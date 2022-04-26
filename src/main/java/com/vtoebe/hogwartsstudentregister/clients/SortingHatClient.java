@@ -2,8 +2,9 @@ package com.vtoebe.hogwartsstudentregister.clients;
 
 import com.vtoebe.hogwartsstudentregister.payloads.clients.HouseInfo;
 import com.vtoebe.hogwartsstudentregister.payloads.clients.HouseToken;
-import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.http.*;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
@@ -11,6 +12,7 @@ import org.springframework.web.client.RestTemplate;
 import java.util.UUID;
 
 @Service
+@Slf4j
 public class SortingHatClient {
 
     @Value("${example.client.sort}")
@@ -37,7 +39,9 @@ public class SortingHatClient {
         return houseTokenResponse.getBody();
     }
 
+    @Cacheable(cacheNames = "house", key = "#houseToken")
     public HouseInfo getHouseInfo(UUID houseToken) {
+        log.info("searching for house with toke: " + houseToken.toString());
         headers.set(HttpHeaders.ACCEPT, MediaType.APPLICATION_JSON_VALUE);
         HttpEntity<?> entity = new HttpEntity<>(headers);
 
